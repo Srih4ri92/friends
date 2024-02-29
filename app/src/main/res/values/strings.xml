@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Friends</string>
+    <string name="emailHint">email</string>
+    <string name="passwordHint">password</string>
+    <string name="submit">submit</string>
+    <string name="timeline">Timeline</string>
+    <string name="createAccount">Create Account</string>
+    <string name="showHidePassword">Show or Hide Pawwoed</string>
 </resources>
