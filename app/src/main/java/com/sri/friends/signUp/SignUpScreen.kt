@@ -99,7 +99,7 @@ private fun PasswordField(
     value: String,
     onValueChange: (String) -> Unit
 ) {
-    var isPasswordVisibile: Boolean by remember {
+    var isPasswordVisible: Boolean by remember {
         mutableStateOf(false)
     }
     OutlinedTextField(
@@ -111,21 +111,14 @@ private fun PasswordField(
             )
         },
         trailingIcon = {
-            IconButton(onClick = {
-                isPasswordVisibile = !isPasswordVisibile
-            }) {
-                Icon(
-                    painter =
-                        if(isPasswordVisibile)
-                            painterResource(id = R.drawable.ic_password_hide)
-                        else
-                            painterResource(id = R.drawable.ic_password_visible)
-                    ,
-                    contentDescription = stringResource(id = R.string.showHidePassword)
-                )
-            }
+            VisibilityToggle(
+                isPasswordVisible = isPasswordVisible,
+                onClick = {
+                    isPasswordVisible = !isPasswordVisible
+                }
+            )
         },
-        visualTransformation = if(isPasswordVisibile)
+        visualTransformation = if(isPasswordVisible)
                 VisualTransformation.None
             else
                 PasswordVisualTransformation(),
@@ -134,6 +127,23 @@ private fun PasswordField(
         },
         modifier = Modifier.fillMaxWidth()
     )
+}
+
+@Composable
+private fun VisibilityToggle(
+    isPasswordVisible: Boolean,
+    onClick:() ->Unit
+) {
+    IconButton(onClick = { onClick() } ) {
+        Icon(
+            painter =
+            if (isPasswordVisible)
+                painterResource(id = R.drawable.ic_password_hide)
+            else
+                painterResource(id = R.drawable.ic_password_visible),
+            contentDescription = stringResource(id = R.string.showHidePassword)
+        )
+    }
 }
 
 @Composable
