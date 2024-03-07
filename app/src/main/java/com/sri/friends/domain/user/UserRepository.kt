@@ -4,7 +4,7 @@ import com.sri.friends.domain.exceptions.DuplicateAccountException
 import com.sri.friends.signUp.state.SignUpState
 
 class UserRepository(private val inMemoryUserCatalog: InMemoryUserCatalog) {
-    fun signUpState(
+    fun signUp(
         email: String,
         about: String,
         password: String
