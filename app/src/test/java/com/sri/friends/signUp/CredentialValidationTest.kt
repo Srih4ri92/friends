@@ -1,6 +1,8 @@
 package com.sri.friends.signUp
 
 
+import com.sri.friends.domain.user.InMemoryUserCatalog
+import com.sri.friends.domain.user.UserRepository
 import com.sri.friends.domain.validation.CredentialsValidationResult
 import com.sri.friends.domain.validation.RegexCredentialsValidator
 import com.sri.friends.signUp.state.SignUpState
@@ -23,7 +25,10 @@ class CredentialValidationTest {
         "qw@da."
     )
     fun invalidEmail(email: String) {
-        val viewModel = SignUpViewModel(RegexCredentialsValidator())
+        val viewModel = SignUpViewModel(
+            RegexCredentialsValidator(),
+            UserRepository(InMemoryUserCatalog())
+        )
         viewModel.createAccount(email, ":password:", ":about:")
         assertEquals(SignUpState.BadEmail, viewModel.signUpState.value)
     }
@@ -41,7 +46,10 @@ class CredentialValidationTest {
 
         )
     fun invalidPassword(password: String) {
-        val viewModel = SignUpViewModel(RegexCredentialsValidator())
+        val viewModel = SignUpViewModel(
+            RegexCredentialsValidator(),
+            UserRepository(InMemoryUserCatalog())
+        )
         viewModel.createAccount("test@email.com", password, ":about:")
         assertEquals(SignUpState.BadPassword, viewModel.signUpState.value)
     }
