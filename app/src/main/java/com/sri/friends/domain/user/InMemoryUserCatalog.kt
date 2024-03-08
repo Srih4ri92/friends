@@ -10,24 +10,22 @@ class InMemoryUserCatalog(
         about: String,
         password: String
     ): User {
-        if(checkUserExist(email)){
-            throw DuplicateAccountException()
-        }
+        checkUserExist(email)
         val userId = generateUserId(email)
         val user = User(userId, email, about)
         saveUser(password, user)
         return user
     }
 
-    private fun saveUser(password: String, user: User) {
-        userForPassword.getOrPut(password, ::mutableListOf).add(user)
+    private fun checkUserExist(email: String) {
+        if(userForPassword.values.flatten().any { it.email == email }) {
+            throw DuplicateAccountException()
+        }
     }
 
     private fun generateUserId(email: String) = email.takeWhile { it != '@' } + "Id"
 
-    private fun checkUserExist(email: String): Boolean {
-        return userForPassword.values.flatten().any {
-            it.email == email
-        }
+    private fun saveUser(password: String, user: User) {
+        userForPassword.getOrPut(password, ::mutableListOf).add(user)
     }
 }
