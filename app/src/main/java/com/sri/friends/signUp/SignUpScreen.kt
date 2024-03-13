@@ -1,6 +1,7 @@
 package com.sri.friends.signUp
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,17 +32,42 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sri.friends.R
+import com.sri.friends.domain.user.InMemoryUserCatalog
+import com.sri.friends.domain.user.UserRepository
+import com.sri.friends.domain.validation.RegexCredentialsValidator
+import com.sri.friends.signUp.state.SignUpState
 
 @Composable
 fun SingUpScreen(
-    modifier: Modifier
+    modifier: Modifier,
+    onSignedUp: () -> Unit ={}
 ){
+    val regexCredentialsValidator = RegexCredentialsValidator()
+    val userRepository = UserRepository(InMemoryUserCatalog())
+    val viewModel = SignUpViewModel(regexCredentialsValidator, userRepository)
+    val state = viewModel.signUpState.collectAsState().value
+
     var email: String by remember {
         mutableStateOf("")
     }
 
     var password: String by remember {
         mutableStateOf("")
+    }
+
+    var about: String by remember {
+        mutableStateOf("")
+    }
+
+    when(state){
+        SignUpState.BadEmail,
+        SignUpState.BadPassword,
+        SignUpState.DuplicateAccount -> {
+            Log.e("SignUpScreen", "Sign Up error $state.")
+        }
+        is SignUpState.SignedUp -> {
+            onSignedUp()
+        }
     }
 
     Column(
@@ -61,8 +88,20 @@ fun SingUpScreen(
                 password = it
             }
         )
+        AboutField(
+            value = about,
+            onValueChange = {
+                about = it
+            }
+        )
         Button(
-            onClick = { /*TODO*/ },
+            onClick = {
+                viewModel.createAccount(
+                    email = email,
+                    about = "",
+                    password = password
+                )
+            },
             modifier = Modifier
                 .fillMaxWidth()
         ) {
@@ -130,6 +169,26 @@ private fun PasswordField(
 }
 
 @Composable
+private fun AboutField(
+    value: String,
+    onValueChange: (String) -> Unit
+) {
+    OutlinedTextField(
+        value = value,
+        label = {
+            Text(
+                text = stringResource(id = R.string.aboutHint),
+                modifier = Modifier.alpha(0.5f)
+            )
+        },
+        onValueChange = {
+            onValueChange(it)
+        },
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+@Composable
 private fun VisibilityToggle(
     isPasswordVisible: Boolean,
     onClick:() ->Unit
@@ -162,7 +221,7 @@ private fun SignUpScreenTitle(title: Int) {
     uiMode = Configuration.UI_MODE_NIGHT_YES,
     showBackground = true
 )
-fun SingUpScreenDarkPreview(){
+fun SingUpScreenPreviewDark(){
     SingUpScreen(
         modifier = Modifier
             .fillMaxSize()
@@ -176,7 +235,7 @@ fun SingUpScreenDarkPreview(){
     uiMode = Configuration.UI_MODE_NIGHT_NO,
     showBackground = true
 )
-fun SingUpScreenLightPreview(){
+fun SingUpScreenPreviewLight(){
     SingUpScreen(
         modifier = Modifier
             .fillMaxSize()

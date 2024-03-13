@@ -3,7 +3,7 @@ package com.sri.friends.domain.user
 import com.sri.friends.domain.exceptions.DuplicateAccountException
 
 class InMemoryUserCatalog(
-    private val userForPassword: MutableMap<String, MutableList<User>> = mutableMapOf<String, MutableList<User>>()
+    private val userForPassword: MutableMap<String, MutableList<User>> = mutableMapOf()
 ){
     fun createUser(
         email: String,

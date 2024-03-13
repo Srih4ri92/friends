@@ -6,4 +6,5 @@
     <string name="timeline">Timeline</string>
     <string name="createAccount">Create Account</string>
     <string name="showHidePassword">Show or Hide Pawwoed</string>
+    <string name="aboutHint">About</string>
 </resources>

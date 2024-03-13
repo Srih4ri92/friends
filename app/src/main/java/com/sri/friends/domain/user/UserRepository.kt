@@ -5,9 +5,7 @@ import com.sri.friends.signUp.state.SignUpState
 
 class UserRepository(private val inMemoryUserCatalog: InMemoryUserCatalog) {
     fun signUp(
-        email: String,
-        about: String,
-        password: String
+        email: String, about: String, password: String
     ) = try {
         val user = inMemoryUserCatalog.createUser(email, about, password)
         SignUpState.SignedUp(user)
