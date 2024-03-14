@@ -7,4 +7,5 @@
     <string name="createAccount">Create Account</string>
     <string name="showHidePassword">Show or Hide Pawwoed</string>
     <string name="aboutHint">About</string>
+    <string name="duplicateAccountError">User already exists for the email\n\n</string>
 </resources>

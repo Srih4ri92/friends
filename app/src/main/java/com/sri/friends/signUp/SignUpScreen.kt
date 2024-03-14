@@ -1,7 +1,7 @@
 package com.sri.friends.signUp
 
 import android.content.res.Configuration
-import android.util.Log
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,21 +31,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sri.friends.R
-import com.sri.friends.domain.user.InMemoryUserCatalog
-import com.sri.friends.domain.user.UserRepository
-import com.sri.friends.domain.validation.RegexCredentialsValidator
 import com.sri.friends.signUp.state.SignUpState
 
 @Composable
 fun SingUpScreen(
-    modifier: Modifier,
-    onSignedUp: () -> Unit ={}
-){
-    val regexCredentialsValidator = RegexCredentialsValidator()
-    val userRepository = UserRepository(InMemoryUserCatalog())
-    val viewModel = SignUpViewModel(regexCredentialsValidator, userRepository)
-    val state = viewModel.signUpState.collectAsState().value
+    signUpViewModel: SignUpViewModel, onSignedUp: () -> Unit = {}
+) {
+    val state = signUpViewModel.signUpState.collectAsState().value
 
     var email: String by remember {
         mutableStateOf("")
@@ -59,147 +53,111 @@ fun SingUpScreen(
         mutableStateOf("")
     }
 
-    when(state){
-        SignUpState.BadEmail,
-        SignUpState.BadPassword,
-        SignUpState.DuplicateAccount -> {
-            Log.e("SignUpScreen", "Sign Up error $state.")
+    when (state) {
+        SignUpState.BadEmail, SignUpState.BadPassword, SignUpState.DuplicateAccount -> {
+            InfoMessage(R.string.duplicateAccountError)
         }
+
         is SignUpState.SignedUp -> {
             onSignedUp()
         }
     }
 
     Column(
-        modifier = modifier
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp), verticalArrangement = Arrangement.Center
     ) {
         SignUpScreenTitle(title = R.string.createAccount)
-        EmailField(
-            value = email,
-            onValueChange = {
-                email = it
-            }
-        )
-        PasswordField(
-            value = password,
-            onValueChange = {
-                password = it
-            }
-        )
-        AboutField(
-            value = about,
-            onValueChange = {
-                about = it
-            }
-        )
+        EmailField(value = email, onValueChange = {
+            email = it
+        })
+        PasswordField(value = password, onValueChange = {
+            password = it
+        })
+        AboutField(value = about, onValueChange = {
+            about = it
+        })
         Button(
             onClick = {
-                viewModel.createAccount(
-                    email = email,
-                    about = "",
-                    password = password
+                signUpViewModel.createAccount(
+                    email = email, about = "", password = password
                 )
-            },
-            modifier = Modifier
-                .fillMaxWidth()
+            }, modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = stringResource(id = R.string.submit),
-                fontWeight = FontWeight.Bold
+                text = stringResource(id = R.string.submit), fontWeight = FontWeight.Bold
             )
         }
     }
 }
 
 @Composable
+fun InfoMessage(@StringRes stringResource: Int) {
+    Text(
+        text = stringResource(stringResource), style = MaterialTheme.typography.titleLarge
+    )
+}
+
+@Composable
 private fun EmailField(
-    value: String,
-    onValueChange: (String) -> Unit
+    value: String, onValueChange: (String) -> Unit
 ) {
-    OutlinedTextField(
-        value = value,
-        label = {
-            Text(
-                text = stringResource(id = R.string.emailHint),
-                modifier = Modifier.alpha(0.5f)
-            )
-        },
-        onValueChange = {
-            onValueChange(it)
-        },
-        modifier = Modifier.fillMaxWidth()
+    OutlinedTextField(value = value, label = {
+        Text(
+            text = stringResource(id = R.string.emailHint), modifier = Modifier.alpha(0.5f)
+        )
+    }, onValueChange = {
+        onValueChange(it)
+    }, modifier = Modifier.fillMaxWidth()
     )
 }
 
 @Composable
 private fun PasswordField(
-    value: String,
-    onValueChange: (String) -> Unit
+    value: String, onValueChange: (String) -> Unit
 ) {
     var isPasswordVisible: Boolean by remember {
         mutableStateOf(false)
     }
-    OutlinedTextField(
-        value = value,
-        label = {
-            Text(
-                text = stringResource(id = R.string.passwordHint),
-                modifier = Modifier.alpha(0.5f)
-            )
-        },
-        trailingIcon = {
-            VisibilityToggle(
-                isPasswordVisible = isPasswordVisible,
-                onClick = {
-                    isPasswordVisible = !isPasswordVisible
-                }
-            )
-        },
-        visualTransformation = if(isPasswordVisible)
-                VisualTransformation.None
-            else
-                PasswordVisualTransformation(),
-        onValueChange = {
-            onValueChange(it)
-        },
-        modifier = Modifier.fillMaxWidth()
+    OutlinedTextField(value = value, label = {
+        Text(
+            text = stringResource(id = R.string.passwordHint), modifier = Modifier.alpha(0.5f)
+        )
+    }, trailingIcon = {
+        VisibilityToggle(isPasswordVisible = isPasswordVisible, onClick = {
+            isPasswordVisible = !isPasswordVisible
+        })
+    }, visualTransformation = if (isPasswordVisible) VisualTransformation.None
+    else PasswordVisualTransformation(), onValueChange = {
+        onValueChange(it)
+    }, modifier = Modifier.fillMaxWidth()
     )
 }
 
 @Composable
 private fun AboutField(
-    value: String,
-    onValueChange: (String) -> Unit
+    value: String, onValueChange: (String) -> Unit
 ) {
-    OutlinedTextField(
-        value = value,
-        label = {
-            Text(
-                text = stringResource(id = R.string.aboutHint),
-                modifier = Modifier.alpha(0.5f)
-            )
-        },
-        onValueChange = {
-            onValueChange(it)
-        },
-        modifier = Modifier.fillMaxWidth()
+    OutlinedTextField(value = value, label = {
+        Text(
+            text = stringResource(id = R.string.aboutHint), modifier = Modifier.alpha(0.5f)
+        )
+    }, onValueChange = {
+        onValueChange(it)
+    }, modifier = Modifier.fillMaxWidth()
     )
 }
 
 @Composable
 private fun VisibilityToggle(
-    isPasswordVisible: Boolean,
-    onClick:() ->Unit
+    isPasswordVisible: Boolean, onClick: () -> Unit
 ) {
-    IconButton(onClick = { onClick() } ) {
+    IconButton(onClick = { onClick() }) {
         Icon(
-            painter =
-            if (isPasswordVisible)
-                painterResource(id = R.drawable.ic_password_hide)
-            else
-                painterResource(id = R.drawable.ic_password_visible),
+            painter = if (isPasswordVisible) painterResource(id = R.drawable.ic_password_hide)
+            else painterResource(id = R.drawable.ic_password_visible),
             contentDescription = stringResource(id = R.string.showHidePassword)
         )
     }
@@ -217,28 +175,16 @@ private fun SignUpScreenTitle(title: Int) {
 
 @Composable
 @Preview(
-    device = Devices.PIXEL_4_XL,
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    showBackground = true
+    device = Devices.PIXEL_4_XL, uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true
 )
-fun SingUpScreenPreviewDark(){
-    SingUpScreen(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    )
+fun SingUpScreenPreviewDark() {
+    SingUpScreen(viewModel())
 }
 
 @Composable
 @Preview(
-    device = Devices.PIXEL_4_XL,
-    uiMode = Configuration.UI_MODE_NIGHT_NO,
-    showBackground = true
+    device = Devices.PIXEL_4_XL, uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true
 )
-fun SingUpScreenPreviewLight(){
-    SingUpScreen(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    )
+fun SingUpScreenPreviewLight() {
+    SingUpScreen(viewModel())
 }

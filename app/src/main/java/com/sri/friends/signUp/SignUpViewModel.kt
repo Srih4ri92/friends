@@ -1,5 +1,6 @@
 package com.sri.friends.signUp
 
+import androidx.lifecycle.ViewModel
 import com.sri.friends.domain.user.UserRepository
 import com.sri.friends.domain.validation.CredentialsValidationResult
 import com.sri.friends.domain.validation.RegexCredentialsValidator
@@ -9,7 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class SignUpViewModel(
     private val regexCredentialsValidator: RegexCredentialsValidator,
     private val userRepository: UserRepository
-) {
+): ViewModel() {
     private val _signUpState = MutableStateFlow<SignUpState>(SignUpState.BadEmail)
     val signUpState = _signUpState
 
