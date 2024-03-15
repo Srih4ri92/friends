@@ -2,6 +2,7 @@ package com.sri.friends.signUp
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import com.sri.friends.MainActivity
 import com.sri.friends.domain.user.InMemoryUserCatalog
+import com.sri.friends.domain.user.UserCatalog
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -9,25 +10,20 @@ import org.junit.Test
 import org.koin.core.context.loadKoinModules
 import org.koin.dsl.module
 
-
 class SignUpTest {
 
     @get:Rule
     val signUpTestRule = createAndroidComposeRule<MainActivity>()
 
-    private val userCatalog = InMemoryUserCatalog()
+
     private val signUpModule = module {
-        factory{
-            userCatalog
-        }
+        factory<UserCatalog> { InMemoryUserCatalog() }
     }
 
     @Before
-    fun setUp(){
+    fun setUp() {
         loadKoinModules(signUpModule)
     }
-
-
 
     @Test
     fun performSignUp(){
@@ -42,12 +38,14 @@ class SignUpTest {
 
     @Test
     fun duplicateAccountTest(){
-        val signedUpEmail = "anna@email.com"
-        val signedUpPassword = "QWer!@344"
-        userCatalog.createUser(signedUpEmail,signedUpPassword,"`")
+        val signedUpUserEmail = "anna@email.com"
+        val signedUpUserPassword = "QWerty12#$"
+        replaceUserCatalogWith(InMemoryUserCatalog().apply {
+            createUser(signedUpUserEmail, signedUpUserPassword, "")
+        })
         launchSignUpScreen(signUpTestRule){
-            typeEmail(signedUpEmail)
-            typePassword(signedUpPassword)
+            typeEmail(signedUpUserEmail)
+            typePassword(signedUpUserPassword)
             submit()
         }verify {
             duplicateAccountErrorIsShown()
@@ -55,10 +53,14 @@ class SignUpTest {
     }
 
     @After
-    fun tearDown(){
-        val resetModule = module {
-            single { InMemoryUserCatalog() }
+    fun tearDown() {
+        replaceUserCatalogWith(InMemoryUserCatalog())
+    }
+
+    private fun replaceUserCatalogWith(userCatalog: UserCatalog) {
+        val replaceModule = module {
+            factory { userCatalog }
         }
-        loadKoinModules(resetModule)
+        loadKoinModules(replaceModule)
     }
 }

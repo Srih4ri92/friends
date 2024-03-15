@@ -4,8 +4,9 @@ import com.sri.friends.domain.exceptions.DuplicateAccountException
 
 class InMemoryUserCatalog(
     private val userForPassword: MutableMap<String, MutableList<User>> = mutableMapOf()
-){
-    fun createUser(
+): UserCatalog{
+
+    override fun createUser(
         email: String,
         about: String,
         password: String
@@ -28,4 +29,6 @@ class InMemoryUserCatalog(
     private fun saveUser(password: String, user: User) {
         userForPassword.getOrPut(password, ::mutableListOf).add(user)
     }
+
+
 }

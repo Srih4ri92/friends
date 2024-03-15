@@ -1,9 +1,11 @@
 package com.sri.friends.signUp
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,7 +39,8 @@ import com.sri.friends.signUp.state.SignUpState
 
 @Composable
 fun SingUpScreen(
-    signUpViewModel: SignUpViewModel, onSignedUp: () -> Unit = {}
+    signUpViewModel: SignUpViewModel,
+    onSignedUp: () -> Unit = {}
 ) {
     val state = signUpViewModel.signUpState.collectAsState().value
 
@@ -53,9 +56,15 @@ fun SingUpScreen(
         mutableStateOf("")
     }
 
+    var showInfoMessage: Boolean by remember {
+        mutableStateOf(false)
+    }
+
     when (state) {
-        SignUpState.BadEmail, SignUpState.BadPassword, SignUpState.DuplicateAccount -> {
-            InfoMessage(R.string.duplicateAccountError)
+        SignUpState.BadEmail, SignUpState.BadPassword ->{}
+        SignUpState.DuplicateAccount -> {
+            Log.e("SignUpScreen State", "SingUpScreen: $state")
+            showInfoMessage = true
         }
 
         is SignUpState.SignedUp -> {
@@ -63,32 +72,41 @@ fun SingUpScreen(
         }
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp), verticalArrangement = Arrangement.Center
-    ) {
-        SignUpScreenTitle(title = R.string.createAccount)
-        EmailField(value = email, onValueChange = {
-            email = it
-        })
-        PasswordField(value = password, onValueChange = {
-            password = it
-        })
-        AboutField(value = about, onValueChange = {
-            about = it
-        })
-        Button(
-            onClick = {
-                signUpViewModel.createAccount(
-                    email = email, about = "", password = password
-                )
-            }, modifier = Modifier.fillMaxWidth()
+            .padding(16.dp)
+    ){
+        Column(
+            modifier = Modifier
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = stringResource(id = R.string.submit), fontWeight = FontWeight.Bold
-            )
+            SignUpScreenTitle(title = R.string.createAccount)
+            EmailField(value = email, onValueChange = {
+                email = it
+            })
+            PasswordField(value = password, onValueChange = {
+                password = it
+            })
+            AboutField(value = about, onValueChange = {
+                about = it
+            })
+            Button(
+                onClick = {
+                    signUpViewModel.createAccount(
+                        email = email, about = "", password = password
+                    )
+                }, modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(id = R.string.submit), fontWeight = FontWeight.Bold
+                )
+            }
+        }
+        if(showInfoMessage){
+            InfoMessage(stringResource = R.string.duplicateAccountError)
         }
     }
 }
